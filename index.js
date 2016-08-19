@@ -64,23 +64,80 @@ app.get('/', (req, res) => {
 		} else {
 			backups = files
 		}
-		res.render('index', { running: true, backups: backups.reverse() })
+		checkRunning((err, running) => {
+			if (err) {
+				res.status(500).render(
+					'error-redirect',
+					{ message: 'An error occured trying to check if the server is running' })
+				res.end()
+				return
+			}
+			res.render('index', { running: running, backups: backups.reverse() })
+		})
 	})
 })
 
 app.post('/start', (req, res) => {
-	console.log('Starting server!')
-	res.redirect('/')
+	checkRunning((err, running) => {
+		if (err) {
+			res.status(500).render(
+				'error-redirect',
+				{ message: 'An error occured trying to check if the server is running' })
+			res.end()
+			return
+		}
+		if (running) {
+			res.render(
+				'error-redirect',
+				{ message: 'The server is already running!' })
+			res.end()
+			return
+		}
+		console.log('Starting server!')
+		res.redirect('/')
+	})
 })
 
 app.post('/stop', (req, res) => {
-	console.log('Stopping server!')
-	res.redirect('/')
+	checkRunning((err, running) => {
+		if (err) {
+			res.status(500).render(
+				'error-redirect',
+				{ message: 'An error occured trying to check if the server is running' })
+			res.end()
+			return
+		}
+		if (!running) {
+			res.render(
+				'error-redirect',
+				{ message: 'The server is not running!' })
+			res.end()
+			return
+		}
+		console.log('Stopping server!')
+		res.redirect('/')
+	})
 })
 
 app.post('/forcestop', (req, res) => {
-	console.log('Force stopping server!')
-	res.redirect('/')
+	checkRunning((err, running, pid) => {
+		if (err) {
+			res.status(500).render(
+				'error-redirect',
+				{ message: 'An error occured trying to check if the server is running' })
+			res.end()
+			return
+		}
+		if (!running) {
+			res.render(
+				'error-redirect',
+				{ message: 'The server is not running!' })
+			res.end()
+			return
+		}
+		console.log('Force stopping server!')
+		res.redirect('/')
+	})
 })
 
 app.post('/restore', (req, res) => {
