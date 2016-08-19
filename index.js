@@ -117,7 +117,7 @@ app.post('/start', (req, res) => {
 			return
 		}
 		console.log(`Starting server in directory ${minecraft_dir}`)
-		spawn('/bin/sh', ['./ServerStart.sh'], { cwd: minecraft_dir })
+		spawn('tmux', ['send-keys', '-t', '0:1', 'C-z', 'cd', ` '${minecraft_dir}'`, 'C-m', './ServerStart.sh', 'C-m'])
 		res.redirect('/')
 	})
 })
