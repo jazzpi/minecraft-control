@@ -6,6 +6,7 @@
   "dependencies": {
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
+    "ps-node": "^0.1.2",
     "pug": "^2.0.0-beta5"
   },
   "devDependencies": {},

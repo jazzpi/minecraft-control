@@ -4,6 +4,7 @@ const path = require('path')
 
 const express = require('express')
 const bodyParser = require('body-parser')
+const ps = require('ps-node')
 
 const minecraft_dir = path.join(os.homedir(), 'ftb-infty')
 const port = 9001
@@ -11,7 +12,42 @@ const port = 9001
 console.log(`Minecraft directory is ${minecraft_dir}, port is ${port}`)
 
 const checkRunning = cb => {
-	cb(false, false)
+	ps.lookup({
+		command: '/bin/sh',
+		arguments: 'ServerStart.sh'
+	}, (err, results) => {
+		if (err) {
+			cb(err)
+			return
+		}
+		if (results.length > 1) {
+			cb('More than one start script running!')
+			return
+		}
+		if (results.length == 0) {
+			cb(false, false)
+			return
+		}
+		ps.lookup({
+			command: 'java',
+			ppid: results[0].pid
+		}, (err, results) => {
+			if (err) {
+				cb(err)
+				return
+			}
+			if (results.length > 1) {
+				cb('More than one java process running!')
+				return
+			}
+			if (results.length == 0) {
+				cb(false, false)
+				return
+			}
+			console.log(`Server running with PID ${results[0].pid}`)
+			cb(false, true, results[0].pid)
+		})
+	})
 }
 
 let app = express()
