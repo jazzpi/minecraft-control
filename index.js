@@ -1,6 +1,7 @@
 const os = require('os')
 const fs = require('fs')
 const path = require('path')
+const spawn = require('child_process').spawn
 
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -77,6 +78,28 @@ app.get('/', (req, res) => {
 	})
 })
 
+app.post('/startbackup', (req, res) => {
+	checkRunning((err, running) => {
+		if (err) {
+			res.status(500).render(
+				'error-redirect',
+				{ message: 'An error occured trying to check if the server is running' })
+			res.end()
+			return
+		}
+		if (!running) {
+			res.render(
+				'error-redirect',
+				{ message: 'The server is not running!' })
+			res.end()
+			return
+		}
+		console.log('Starting backup!')
+		spawn('tmux', ['send-keys', '-t', '0:1', 'admin backup start', 'C-m'])
+		res.redirect('/')
+	})
+})
+
 app.post('/start', (req, res) => {
 	checkRunning((err, running) => {
 		if (err) {
@@ -93,7 +116,8 @@ app.post('/start', (req, res) => {
 			res.end()
 			return
 		}
-		console.log('Starting server!')
+		console.log(`Starting server in directory ${minecraft_dir}`)
+		spawn('/bin/sh', ['./ServerStart.sh'], { cwd: minecraft_dir })
 		res.redirect('/')
 	})
 })
@@ -115,6 +139,8 @@ app.post('/stop', (req, res) => {
 			return
 		}
 		console.log('Stopping server!')
+		// Send "stop\n" in first window of tmux session 0
+		spawn('tmux', ['send-keys', '-t', '0:1', 'stop', 'C-m'])
 		res.redirect('/')
 	})
 })
@@ -136,6 +162,7 @@ app.post('/forcestop', (req, res) => {
 			return
 		}
 		console.log('Force stopping server!')
+		spawn('kill', ['-9', pid])
 		res.redirect('/')
 	})
 })

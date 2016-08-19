@@ -11,6 +11,10 @@ html
 			else
 				span(class="not-running") not running
 
+		p#startbackup
+			form(action="/startbackup", method="post")
+				button(type="submit") Start Backup
+
 		p#start
 			form(action="/start", method="post")
 				button(type="submit") Start Server
