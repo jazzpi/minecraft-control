@@ -1,0 +1,34 @@
+doctype html
+html
+	head
+		title Minecraft Control
+	body
+		h1 Minecraft Control
+		p#isrunning
+			| Server is 
+			if running
+				span(class="running") running
+			else
+				span(class="not-running") not running
+
+		p#start
+			form(action="/start", method="post")
+				button(type="submit") Start Server
+
+		p#stop
+			form(action="/stop", method="post")
+				button(type="submit") Stop Server
+
+		p#forcestop
+			form(action="/forcestop", method="post")
+				button(type="submit") Force Stop
+
+		div#backups
+			h2 Backups
+			ul
+				each backup in backups
+					li
+						span= backup
+						form(action="/restore", method="post")
+							input(type="hidden", name="date", value=backup)
+							button(type="submit") Restore This Backup

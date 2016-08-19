@@ -1,0 +1,17 @@
+{
+  "name": "minecraft-control",
+  "version": "0.0.1",
+  "description": "A simple web interface to control a Minecraft server",
+  "main": "index.js",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "pug": "^2.0.0-beta5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
