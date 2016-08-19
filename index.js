@@ -190,9 +190,42 @@ app.post('/restore', (req, res) => {
 			res.end()
 			return
 		}
+		let renderFile = filename => {
+			let fd = fs.openSync(path.join(process.cwd(), 'views', filename), 'r')
+			res.write(fs.readFileSync(fd))
+			fs.close(fd, () => {})
+		}
 		console.log(`Restoring backup ${req.body.date}`)
-		res.render('restoring-backup', { date: req.body.date })
-		res.end()
+		res.set('Content-Type', 'text/html')
+		res.writeHead(200)
+		renderFile('restoring-backup.html')
+		res.write(` ${req.body.date}...</p>`)
+		let rmProc = spawn('rm', ['-rf', path.join(minecraft_dir, 'world')])
+		rmProc.on('exit', code => {
+			if (code !== 0) {
+				console.error(`Restoring backup was unsuccessful, rm exited with ${code}`)
+				renderFile('backup-unsuccessful.html')
+				res.end()
+				return
+			}
+			let unzipProc = spawn(
+				'unzip',
+				[path.join(minecraft_dir, 'backups', req.body.date, 'backup.zip')],
+				{ cwd: minecraft_dir })
+			unzipProc.stderr.on('data', data => {
+				console.error(`[unzip/STDERR] ${data.toString()}`)
+			})
+			unzipProc.on('exit', code => {
+				if (code === 0) {
+					console.log('Restoring backup was successful')
+					renderFile('backup-successful.html')
+				} else {
+					console.error(`Restoring backup was unsuccessful, unzip exited with ${code}`)
+					renderFile('backup-unsuccessful.html')
+				}
+				res.end()
+			})
+		})
 	})
 })
 
