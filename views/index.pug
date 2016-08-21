@@ -1,38 +1,38 @@
+include ./includes/util.pug
 doctype html
 html
-	head
-		title Minecraft Control
+	+head("Minecraft Control")
 	body
-		h1 Minecraft Control
-		p#isrunning
-			| Server is 
-			if running
-				span(class="running") running
-			else
-				span(class="not-running") not running
+		.jumbotron
+			.container
+				h1 Minecraft Control
+				p#isrunning
+					| Server is 
+					if running
+						span(class="running") running
+					else
+						span(class="not-running") not running
 
-		p#startbackup
-			form(action="/startbackup", method="post")
-				button(type="submit") Start Backup
+				#controlbuttons
+					span(class="col-md-3")
+						form(action="/startbackup", method="post")
+							button(type="submit", class="btn btn-primary btn-block") Start Backup
+					span(class="col-md-3")
+						form(action="/start", method="post")
+							button(type="submit", class="btn btn-success btn-block") Start Server
+					span(class="col-md-3")
+						form(action="/stop", method="post")
+							button(type="submit", class="btn btn-warning btn-block") Stop Server
+					span(class="col-md-3")
+						form(action="/forcestop", method="post")
+							button(type="submit", class="btn btn-danger btn-block") Force Stop
 
-		p#start
-			form(action="/start", method="post")
-				button(type="submit") Start Server
-
-		p#stop
-			form(action="/stop", method="post")
-				button(type="submit") Stop Server
-
-		p#forcestop
-			form(action="/forcestop", method="post")
-				button(type="submit") Force Stop
-
-		div#backups
-			h2 Backups
-			ul
+		.container
+			div#backups
+				h2 Backups
 				each backup in backups
-					li
+					.backup.col-md-3
 						span= backup
 						form(action="/restore", method="post")
 							input(type="hidden", name="date", value=backup)
-							button(type="submit") Restore This Backup
+							button(type="submit", class="btn btn-primary") Restore This Backup

@@ -1,0 +1,14 @@
+.not-running {
+	color: #f00;
+}
+
+.running {
+	color: #0f0;
+}
+
+.backup {
+	text-align: center;
+	padding-bottom: 2px;
+	border-bottom: 1px solid lightgray;
+	margin-bottom: 5px;
+}

@@ -6,11 +6,16 @@ const spawn = require('child_process').spawn
 const express = require('express')
 const bodyParser = require('body-parser')
 const ps = require('ps-node')
+const pug = require('pug')
 
 const minecraft_dir = path.join(os.homedir(), 'ftb-infty')
 const port = 9001
 
 console.log(`Minecraft directory is ${minecraft_dir}, port is ${port}`)
+
+const restoringBackup = pug.compileFile('views/restoring-backup.pug')
+const backupSuccessful = pug.compileFile('views/backup-successful.pug')
+const backupUnsuccessful = pug.compileFile('views/backup-unsuccessful.pug')
 
 const checkRunning = cb => {
 	ps.lookup({
@@ -54,6 +59,7 @@ const checkRunning = cb => {
 let app = express()
 app.set('view engine', 'pug')
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(express.static('static'))
 
 app.get('/', (req, res) => {
 	let backups_dir = path.join(minecraft_dir, 'backups')
@@ -190,21 +196,15 @@ app.post('/restore', (req, res) => {
 			res.end()
 			return
 		}
-		let renderFile = filename => {
-			let fd = fs.openSync(path.join(process.cwd(), 'views', filename), 'r')
-			res.write(fs.readFileSync(fd))
-			fs.close(fd, () => {})
-		}
 		console.log(`Restoring backup ${req.body.date}`)
 		res.set('Content-Type', 'text/html')
 		res.writeHead(200)
-		renderFile('restoring-backup.html')
-		res.write(` ${req.body.date}...</p>`)
+		res.write(restoringBackup({ date: req.body.date }))
 		let rmProc = spawn('rm', ['-rf', path.join(minecraft_dir, 'world')])
 		rmProc.on('exit', code => {
 			if (code !== 0) {
 				console.error(`Restoring backup was unsuccessful, rm exited with ${code}`)
-				renderFile('backup-unsuccessful.html')
+				res.write(backupUnsuccessful())
 				res.end()
 				return
 			}
@@ -218,10 +218,10 @@ app.post('/restore', (req, res) => {
 			unzipProc.on('exit', code => {
 				if (code === 0) {
 					console.log('Restoring backup was successful')
-					renderFile('backup-successful.html')
+					res.write(backupSuccessful())
 				} else {
 					console.error(`Restoring backup was unsuccessful, unzip exited with ${code}`)
-					renderFile('backup-unsuccessful.html')
+					res.write(backupUnsuccessful())
 				}
 				res.end()
 			})

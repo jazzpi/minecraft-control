@@ -1,10 +1,12 @@
+include ./includes/util.pug
 doctype html
 html
-	head
-		meta(http-equiv='refresh', content='5;url=/')
-		title Error
+	+head("Error", '<meta http-equiv="refresh" content="5;url=/">')
 	body
-		h1 Error
-		p= message
-		hr
-		p You will be redirected after 5 seconds
+		.container
+			h1 Error
+			div(class="alert alert-danger" role="alert")= message
+			hr
+			div(class="alert alert-info" role="alert") You will be redirected after 5 seconds. 
+				strong
+					a(href="/") Go back now
